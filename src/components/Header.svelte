@@ -48,7 +48,7 @@
 	});
 </script>
 
-<div class="top__container">
+<div class="top__container" on:mouseenter={reClearTimeout} on:mouseleave={reSetTimeout}>
 	<div class="header__container">
 		<div class="header__gradient" />
 		{#each headers as header, index}
@@ -67,7 +67,7 @@
 		<div class="hover__outline" />
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="slideshow__buttons" on:mouseenter={reClearTimeout} on:mouseleave={reSetTimeout}>
+		<div class="slideshow__buttons">
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
 			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-static-element-interactions -->
@@ -155,10 +155,10 @@
 		transition: steps(4, end) opacity 0.25s;
 		z-index: 99;
 	}
-	.img__container:hover > .slideshow__buttons > .slideshow__button {
+	.top__container:hover .slideshow__button {
 		background-color: rgba(0, 0, 0, 0.25);
 	}
-	.img__container:hover > .slideshow__buttons {
+	.top__container:hover .slideshow__buttons {
 		opacity: 1;
 	}
 	.slideshow__button {
@@ -216,7 +216,7 @@
 		border-bottom-right-radius: 4px;
 		z-index: 9999 !important;
 	}
-	.img__container:hover .hover__outline {
+	.top__container:hover .hover__outline {
 		opacity: 1;
 	}
 	/* hack for fading; not ideal but eh */
