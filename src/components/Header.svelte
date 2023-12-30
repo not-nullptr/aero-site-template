@@ -1,7 +1,15 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import FadeButton from "./FadeButton.svelte";
+	import loading from "$lib/assets/loading.gif";
+	import frame from "$lib/assets/slideshow/frame.png";
+	import playlist from "$lib/assets/audio/FA-playlist.mp3";
 
 	let currentIndex = 0;
+	let paused = true;
+	let muted = true;
+	const volume = 0.3;
+	let buttons: string[] = [];
 	export let headers: {
 		header: string;
 		text: string;
@@ -23,72 +31,207 @@
 		// Add more headers as needed
 	];
 	let interval: number;
+	let audio: HTMLAudioElement | null;
+
+	function fadeAudioIn() {
+		if (!audio) return;
+		audio.play();
+		let interval = setInterval(() => {
+			if (!audio) return;
+			if (audio.volume < volume) {
+				audio.volume = Math.min(audio.volume + 0.01, volume);
+			} else {
+				audio.volume = volume;
+				clearInterval(interval);
+			}
+		}, 10);
+	}
+
+	function fadeAudioOut() {
+		if (!audio) return;
+		let interval = setInterval(() => {
+			if (!audio) return;
+			if (audio.volume > 0) {
+				audio.volume = Math.max(audio.volume - 0.01, 0);
+			} else {
+				audio.volume = 0;
+				clearInterval(interval);
+			}
+		}, 10);
+	}
+
 	function nextHeader() {
+		reSetTimeout();
 		currentIndex = (currentIndex + 1) % headers.length;
 	}
 
 	function previousHeader() {
+		reSetTimeout();
 		currentIndex = (currentIndex - 1 + headers.length) % headers.length;
 	}
 
 	function reSetTimeout() {
-		console.log("set");
+		paused = false;
 		clearInterval(interval);
 		interval = setInterval(() => {
 			nextHeader();
 		}, 5000);
 	}
 	function reClearTimeout() {
-		console.log("clear");
+		paused = true;
 		clearInterval(interval);
 	}
+	async function preLoadImages() {
+		const glob = import.meta.glob("$lib/assets/buttons/**/*.png");
+		const images = (await Promise.all(Object.values(glob).map((v) => v()))).map(
+			(v) => (v as { default: string }).default,
+		);
+		buttons = images;
+	}
+	let loaded = 0;
+	function incrementLoaded() {
+		loaded++;
+		if (loaded === headers.length) {
+		}
+	}
+	function muteToggle() {
+		muted = !muted;
+		muted ? fadeAudioOut() : fadeAudioIn();
+	}
+	function mute() {
+		if (muted) return;
+		muted = true;
+		fadeAudioOut();
+	}
+	function unmute() {
+		if (!muted) return;
+		muted = false;
+		fadeAudioIn();
+	}
 	onMount(() => {
-		reSetTimeout();
+		audio = document.querySelector("audio");
+		if (audio) {
+			audio.volume = volume;
+		}
+		preLoadImages();
 		return reClearTimeout;
 	});
 </script>
 
-<div class="top__container" on:mouseenter={reClearTimeout} on:mouseleave={reSetTimeout}>
+<svelte:head>
+	{#each buttons as button}
+		<link rel="preload" href={button} as="image" />
+	{/each}
+	{#each headers as header}
+		<link rel="preload" href={header.src} as="image" />
+	{/each}
+</svelte:head>
+
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<div class="top__container">
+	<audio src={playlist} />
+	<div class="preload__container">
+		<!-- {#each headers as header}
+			<img src={header.src} alt={header.alt} />
+		{/each} -->
+	</div>
 	<div class="header__container">
 		<div class="header__gradient" />
-		{#each headers as header, index}
-			<div class="header__content {index === currentIndex ? 'fade-in' : 'fade-out'}">
-				<div>
-					<h1>{header.header}</h1>
-					<div class={index === currentIndex ? "fade-in" : "fade-out"}>
-						{header.text}
+		{#if loaded > 2}
+			{#each headers as header, index}
+				<div class="header__content {index === currentIndex ? 'fade-in' : 'fade-out'}">
+					<div>
+						<h1>{header.header}</h1>
+						<div class={index === currentIndex ? "fade-in" : "fade-out"}>
+							{header.text}
+						</div>
 					</div>
 				</div>
+			{/each}
+		{:else}
+			<div class="header__content">
+				<div>
+					<h1>Loading...</h1>
+					<div>Your slideshow is loading. Please wait...</div>
+				</div>
 			</div>
-		{/each}
+		{/if}
 	</div>
 	<div class="img__container">
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<div class="hover__outline" />
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="slideshow__buttons">
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<div class="slideshow__button left" on:click={previousHeader}>◀</div>
-			<!-- svelte-ignore a11y-no-static-element-interactions -->
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
-			<div class="slideshow__button right" on:click={nextHeader}>▶</div>
+			<div class="mute__button">
+				{#if muted}
+					<FadeButton on:click={muteToggle} button="mute" />
+				{:else}
+					<FadeButton on:click={muteToggle} button="audible" />
+				{/if}
+			</div>
+			<div style="display: flex; align-items: center; position: relative;">
+				<img src={frame} alt="frame" class="buttons__frame" />
+				<FadeButton
+					onLoad={incrementLoaded}
+					on:click={() => {
+						previousHeader();
+						unmute();
+					}}
+					button="left"
+				/>
+				<FadeButton
+					onLoad={incrementLoaded}
+					on:click={() => {
+						if (paused) {
+							unmute();
+							reSetTimeout();
+						} else {
+							mute();
+							reClearTimeout();
+						}
+					}}
+					className="play__button"
+					button={paused ? "play" : "pause"}
+				/>
+				<FadeButton
+					onLoad={incrementLoaded}
+					on:click={() => {
+						nextHeader();
+						unmute();
+					}}
+					button="right"
+				/>
+			</div>
 		</div>
 		<div class="img">
-			{#each headers as header, index}
-				<img
-					src={header.src}
-					alt={header.alt}
-					class={index === currentIndex ? "fade-in" : "fade-out"}
-				/>
-			{/each}
+			{#if loaded > 2}
+				{#each headers as header, index}
+					<img
+						src={header.src}
+						alt={header.alt}
+						class={index === currentIndex ? "fade-in" : "fade-out"}
+					/>
+				{/each}
+			{:else}
+				<img src={loading} alt="Loading" />
+			{/if}
 		</div>
 	</div>
 </div>
 
 <style>
+	.preload__container {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		pointer-events: none;
+		width: 1px;
+		height: 1px;
+	}
+	/* .preload__container > img {
+		width: 1px;
+		height: 1px;
+		opacity: 0;
+	} */
 	.header__content {
 		transition: opacity 0.25s steps(4, end);
 		position: relative;
@@ -119,7 +262,11 @@
 		left: 0;
 		width: 100%;
 	}
-
+	.mute__button {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+	}
 	.img img.fade-in {
 		opacity: 1;
 		position: relative;
@@ -149,46 +296,17 @@
 		width: calc(100% + 1px);
 		height: 100%;
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		align-items: flex-end;
+		justify-content: center;
 		opacity: 0.5;
 		transition: steps(4, end) opacity 0.25s;
 		z-index: 99;
 	}
-	.top__container:hover .slideshow__button {
-		background-color: rgba(0, 0, 0, 0.25);
+	:global(.button__container) {
+		z-index: 20;
 	}
 	.top__container:hover .slideshow__buttons {
 		opacity: 1;
-	}
-	.slideshow__button {
-		width: 32px;
-		height: 72px;
-		background-color: rgba(98, 98, 98, 0.75);
-		box-shadow: var(--aero-outline);
-		color: rgba(255, 255, 255, 0.729);
-		display: flex;
-		align-items: center;
-		box-sizing: border-box;
-		padding: 0px 8px;
-		backdrop-filter: blur(3px);
-		cursor: pointer;
-		transition: steps(4, end) background-color 0.25s;
-	}
-	.slideshow__button:hover {
-		filter: brightness(1.1);
-	}
-	.slideshow__button:active {
-		filter: brightness(0.9);
-	}
-	.slideshow__button.left {
-		border-top-right-radius: 4px;
-		border-bottom-right-radius: 4px;
-	}
-	.slideshow__button.right {
-		border-top-left-radius: 4px;
-		border-bottom-left-radius: 4px;
-		padding: 0 12px;
 	}
 	.img {
 		width: 100%;
@@ -254,5 +372,13 @@
 	}
 	.header__content > div {
 		color: #444;
+	}
+	.buttons__frame {
+		position: absolute;
+		bottom: 6px;
+		left: -13px;
+		width: 172px;
+		height: auto;
+		opacity: 0;
 	}
 </style>

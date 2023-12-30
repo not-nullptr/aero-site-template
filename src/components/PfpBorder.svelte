@@ -12,7 +12,7 @@
 	}
 </script>
 
-<div class="border">
+<div class={`border ${status}`}>
 	<img src={pfp} alt="pfp" class="pfp" />
 	<div class="status">
 		{#await getBorderFromStatus(status, "static")}
@@ -26,6 +26,9 @@
 <style>
 	.border {
 		position: relative;
+	}
+	.border.offline {
+		opacity: 0.75;
 	}
 	.pfp {
 		position: absolute;
