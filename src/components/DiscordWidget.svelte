@@ -93,6 +93,13 @@
 			</div>
 		</div>
 	</div>
+	<div class="footer">
+		This is a live-updating widget of {userData.discord_user.display_name ||
+			userData.discord_user.username}'s status on Discord.
+		<br />
+		Powered by
+		<a class="footer__link" target="_blank" href="https://lanyard.eggsy.xyz/">Lanyard</a>.
+	</div>
 {/if}
 
 <style>
@@ -145,5 +152,17 @@
 		height: 13px;
 		margin-top: 0px;
 		margin-bottom: -1px;
+	}
+	.footer {
+		margin-top: 4px;
+	}
+	.footer,
+	.footer * {
+		opacity: 0.5;
+		font-size: 10px;
+	}
+	.footer__link {
+		color: #000000;
+		opacity: 1;
 	}
 </style>

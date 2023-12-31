@@ -42,9 +42,6 @@
 					>
 				</li>
 			</ul>
-			that's it. to be honest i dont know why i thought that stuff would help too much. anyway
-			this page is pretty easily modifiable; the sidebar and stuff should all stay properly positioned
-			no matter what.
 		</div>
 	</div>
 	<div class="sidebar">
@@ -59,8 +56,63 @@
 		<DiscordWidget userId="526468680498806786" />
 	</div>
 </div>
+<div class="content__grid">
+	<div class="content__item">
+		<h1>Some sample text.</h1>
+		<div>
+			Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime id ipsa reiciendis sed
+			omnis quod quis inventore. Doloremque officiis eos facilis ab quisquam id eligendi ex
+			velit adipisci? Repudiandae, fugiat.
+		</div>
+	</div>
+	<div class="content__item">
+		<h1>More sample text.</h1>
+		<div>
+			Lorem ipsum dolor sit amet consectetur adipisicing elit. Nulla beatae repellat quam
+			perspiciatis. Eligendi nulla unde cumque facere porro nam, commodi quam natus
+			dignissimos, eos ab aut aspernatur rerum nostrum.
+		</div>
+	</div>
+	<div class="content__item">
+		<h1>Why You Should Give Me AWM</h1>
+		<div>
+			Lorem ipsum dolor sit amet consectetur adipisicing elit. Facere nesciunt quisquam
+			voluptates itaque voluptas dicta minus. Quasi modi in placeat ullam at aliquam voluptate
+			non laboriosam illum impedit. Libero, perferendis?
+		</div>
+	</div>
+</div>
 
 <style>
+	.content__grid {
+		margin-top: 32px;
+		display: grid;
+		grid-template-columns: auto auto auto;
+		width: 100%;
+		box-sizing: border-box;
+		padding: 0px 32px;
+		gap: 96px;
+	}
+	.content__item {
+		padding: 12px 16px;
+		backdrop-filter: blur(3px);
+		border-radius: 4px;
+		background-color: #cce1f35a;
+		box-shadow:
+			0px 0px 8px 0px rgba(0, 0, 0, 0.478),
+			var(--aero-outline);
+		text-shadow:
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80,
+			0px 0px 16px #ffffff80;
+	}
+	.content__item > h1:first-child {
+		margin-top: 0px;
+	}
 	.content__container {
 		display: flex;
 	}

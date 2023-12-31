@@ -55,6 +55,7 @@
 				audio.volume = Math.max(audio.volume - 0.01, 0);
 			} else {
 				audio.volume = 0;
+				audio.pause();
 				clearInterval(interval);
 			}
 		}, 10);
@@ -344,7 +345,6 @@
 		left: 0;
 		height: 100%;
 		width: 100%;
-		background: linear-gradient(to right, #fcfcfc, transparent 30%, transparent 70%, #fcfcfc);
 		z-index: 0;
 	}
 	.header__container {

@@ -1,5 +1,8 @@
 body {
-	background-color: #fcfcfc;
+	/* background-color: #fcfcfc; */
+	background: url($lib/assets/aero-bg.jpg);
+	background-size: 100vw 100vh;
+	background-position: 0px 0px;
 	margin: 0;
 	overflow: hidden;
 	--aero-white: #ffffff7a;
